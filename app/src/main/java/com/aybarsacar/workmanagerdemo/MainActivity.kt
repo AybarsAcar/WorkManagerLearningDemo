@@ -6,7 +6,7 @@ import android.util.Log
 import android.widget.Button
 import android.widget.TextView
 import androidx.work.*
-import org.w3c.dom.Text
+import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -14,6 +14,7 @@ class MainActivity : AppCompatActivity() {
     setContentView(R.layout.activity_main)
 
     val buttonOneTimeRequest = findViewById<Button>(R.id.button)
+    val buttonPeriodicRequest = findViewById<Button>(R.id.button_periodic_request)
     val tvOneTimeRequest = findViewById<TextView>(R.id.tv_main_display)
 
     buttonOneTimeRequest.setOnClickListener {
@@ -23,6 +24,7 @@ class MainActivity : AppCompatActivity() {
       val oneTimeRequestConstraints = Constraints.Builder()
         .setRequiresCharging(false)
         .setRequiredNetworkType(NetworkType.CONNECTED)
+        .setRequiresBatteryNotLow(true)
         .build()
 
       val data = Data.Builder()
@@ -88,6 +90,26 @@ class MainActivity : AppCompatActivity() {
             }
           }
         })
+    }
+
+    buttonPeriodicRequest.setOnClickListener {
+
+      // create constraints to make sure the work manager only runs
+      // when the following constraints are met
+      val periodicRequestConstraints = Constraints.Builder()
+        .setRequiresCharging(false)
+        .setRequiredNetworkType(NetworkType.CONNECTED)
+        .setRequiresBatteryNotLow(true)
+        .build()
+
+      // create a periodic request
+      val periodicRequest = PeriodicWorkRequest.Builder(PeriodicRequestWorker::class.java, 4, TimeUnit.SECONDS)
+        .setConstraints(periodicRequestConstraints)
+        .build()
+
+      WorkManager.getInstance(this@MainActivity)
+        .enqueueUniquePeriodicWork("Periodic work request", ExistingPeriodicWorkPolicy.KEEP, periodicRequest)
+
     }
   }
 }
