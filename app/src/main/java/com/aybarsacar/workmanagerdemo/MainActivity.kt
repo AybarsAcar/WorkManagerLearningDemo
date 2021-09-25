@@ -103,7 +103,8 @@ class MainActivity : AppCompatActivity() {
         .build()
 
       // create a periodic request
-      val periodicRequest = PeriodicWorkRequest.Builder(PeriodicRequestWorker::class.java, 4, TimeUnit.SECONDS)
+      // minimum amount interval is 15 minutes
+      val periodicRequest = PeriodicWorkRequest.Builder(PeriodicRequestWorker::class.java, 15, TimeUnit.MINUTES)
         .setConstraints(periodicRequestConstraints)
         .build()
 
